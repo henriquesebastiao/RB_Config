@@ -7,13 +7,14 @@ Autor: Henrique Sebastião\n''')
 
 print("Para começar, informe os dados do roteador")
 ip = input("IP: ")
-port = input("Porta SSH: ")
+port = int(input("Porta SSH: "))
 username = input("Usuário: ")
 password = input("Senha: ")
 
 clear()
 
 router_board = Router(ip, port, username, password)  # Create a Router object
+
 try:
     connection = router_board.connect()  # Connect to the router
 except:
@@ -24,19 +25,75 @@ try:
     print("Escolha uma opção:")
     print("1 - Enviar comando")
     print("2 - Setar DNS da RB")
-    print("Ctrl + C - Sair")
+    print("3 - Setar Servidores NTP da RB")
+    print("4 - Adicionar IP")
+    print("Ctrl + C - Sair\n")
     option = int(input("Opção: "))
 
     match option:
-        case 1:
+        case 1:  # Send a command to the router
+            clear()
             command = input("Comando: ")
             router_board.send_command(connection, command)
-        case 2:
+        case 2:  # Set DNS Servers on the router
+            clear()
             number_servers = int(input("Quantos servidores DNS deseja adicionar? "))
+
             servers = []
+
             for i in range(number_servers):
                 servers.append(input(f"Servidor DNS {i + 1}: "))
-            router_board.set_dns(*servers)
+
+            for dns in servers:
+                if not validate_ip(dns):
+                    print("IP inválido")
+                    exit()
+
+            router_board.set_dns(connection, *servers)
+
+        case 3:  # Configure NTP Servers on the router
+            clear()
+            print("Escolha um modo:")
+            print("1 - broadcast")
+            print("2 - manycast")
+            print("3 - multicast")
+            print("4 - unicast")
+            option = int(input("Opção: "))
+
+            if option not in range(1, 5):
+                print("Opção inválida")
+                exit()
+
+            modes = ["broadcast", "manycast", "multicast", "unicast"]
+            mode = modes[option - 1]
+
+            primary_server = input("Servidor primário: ")
+            if not validate_ip(primary_server):
+                print("IP inválido")
+                exit()
+
+            secondary_server = input("Servidor secundário: ")
+            if not validate_ip(secondary_server):
+                print("IP inválido")
+                exit()
+
+            router_board.set_ntp(connection, mode, primary_server, secondary_server)
+        case 4:  # Add an IP address to the router
+            clear()
+            ip = input("IP: ")
+
+            if not validate_ip(ip):
+                print("IP inválido")
+                exit()
+
+            interface = input("Interface: ")
+            netmask = input("Netmask: ")
+
+            if not validate_netmask(netmask):
+                print("Netmask inválida")
+                exit()
+
+            router_board.add_ip(connection, ip, interface, netmask)
         case _:
             print("Opção inválida")
 
