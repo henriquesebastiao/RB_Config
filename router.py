@@ -1,5 +1,4 @@
 import paramiko
-import sys
 
 
 class Router:
@@ -98,6 +97,41 @@ class Router:
         command = f"/system ntp client set enabled=yes mode={mode} primary-ntp={primary_server} secondary-ntp={secondary_server}"
         self.send_command(connection, command)
 
+    def configure_access_point_basic(self, connection, model: int, ssid: str, password: str, band: str) -> None:
+        """
+        Configure the access point with basic settings
+        :param connection: SSHClient object
+        :param model: model
+        :param ssid: SSID
+        :param password: password
+        :param band: band
+        :return: None
+        """
+        if model == 1:
+            comands = [
+                r'/interface wireless security-profiles set [ find default=yes ] supplicant-identity=MikroTik',
+                f'/interface wireless security-profiles add authentication-types=wpa2-psk mode=dynamic-keys name=profile1 supplicant-identity="" wpa-pre-shared-key={password} wpa2-pre-shared-key={password}',
+                f'/interface wireless set [ find default-name=wlan1 ] antenna-gain=6 band={band} country=brazil-anatel disabled=no frequency=auto installation=outdoor mode=ap-bridge radio-name=Groove security-profile=profile1 ssid={ssid} wireless-protocol=802.11 wps-mode=disabled',
+                r'/ip pool add name=dhcp ranges=192.168.0.2-192.168.0.254',
+                r'/ip dhcp-server add address-pool=dhcp disabled=no interface=wlan1 name=dhcp1',
+                r'/ip neighbor discovery-settings set discover-interface-list=!dynamic',
+                r'/interface list member add interface=wlan1 list=LAN',
+                r'/interface list member add interface=ether1 list=WAN',
+                r'/ip address add address=192.168.0.1/24 interface=wlan1 network=192.168.0.0',
+                r'/ip dhcp-client add disabled=no interface=wlan1',
+                r'/ip dhcp-client add disabled=no interface=ether1',
+                r'/ip dhcp-server network add address=192.168.0.0/24 dns-server=8.8.8.8,1.1.1.1 gateway=192.168.0.1 netmask=24',
+                r'/ip dns set servers=8.8.8.8,1.1.1.1',
+                r'/ip firewall nat add action=masquerade chain=srcnat out-interface-list=WAN',
+                r'/ip service set telnet disabled=yes',
+                r'/ip service set api disabled=yes',
+                r'/ip service set api-ssl disabled=yes',
+                r'/system ntp client set enabled=yes primary-ntp=200.160.7.186 secondary-ntp=201.49.148.135',
+                r'/tool romon set enabled=yes id=00:00:00:00:00:01',
+            ]
+
+            for comand in comands:
+                self.send_command(connection, comand)
     def add_dhcp_server(self):  # TODO: Implementar servidor DHCP
         pass
 

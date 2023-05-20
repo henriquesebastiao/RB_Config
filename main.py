@@ -1,5 +1,6 @@
 from router import Router
 from functions import *
+from ready_scripts import *
 
 print('''Bem-vindo ao RB_Config!
 v0.0.1
@@ -27,6 +28,7 @@ try:
     print("2 - Setar DNS da RB")
     print("3 - Setar Servidores NTP da RB")
     print("4 - Adicionar IP")
+    print("5 - Configurar Access Point")
     print("Ctrl + C - Sair\n")
     option = int(input("Opção: "))
 
@@ -94,6 +96,35 @@ try:
                 exit()
 
             router_board.add_ip(connection, ip, interface, netmask)
+        case 5:  # Configure Access Point
+            clear()
+            print("Escolha um modelo:")
+            print("1 - Groove A-52HPn r2 (Modelo de 5.8GHz e 2.4GHz)")
+            try:
+                model = int(input("Opção: "))
+            except ValueError:
+                print("Opção inválida")
+                exit()
+
+            clear()
+            print("Informe os dados para o Access Point")
+            ssid = input("SSID: ")
+            password = input("Senha da rede: ")
+
+            if model == 1:
+                clear()
+                print("Escolha uma banda:")
+                print("1 - 2.4GHz")
+                print("2 - 5.8GHz")
+                band = int(input("Opção: "))
+
+                if band not in range(1, 3):
+                    print("Opção inválida")
+                    exit()
+                else:
+                    band = "2ghz-b/g/n" if band == 1 else "5ghz-a/n"
+
+            router_board.configure_access_point_basic(connection, model, ssid, password, band)
         case _:
             print("Opção inválida")
 
