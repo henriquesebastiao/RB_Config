@@ -14,7 +14,7 @@
     <h2>Instalação</h2>
     <p>Para instalação das dependências:</p>
 
-    <h4>Windows:</h4>
+    <h4>Windows</h4>
     <p>Executar o script <code class="code_inline">install.bat</code> irá instalar o <strong>Python v3.11.3</strong>, o <strong>pip</strong> e o <strong>virtualenv</strong>, lhe poupando tempo. <br>
     No entanto, caso deseja realizar o processo manualmente siga os seguintes passos:</p>
     
@@ -45,6 +45,117 @@
     </div>
 
     <h2>Configuração do ambiente</h2>
-    <p>Recomenda-se usar a ferramenta quando seu rádio"></></p>
+    <p>Recomenda-se usar a ferramenta quando seu rádio ainda está com as configurações de fábrica"></p>
+    <p>Para configurá-lo de acordo que a ferramenta consiga se conectar a ele siga os seguintes passos:</p>
+    <ol>
+        <li>Conecte o rádio ao computador via cabo de rede</li>
+        <li>Conecte-se ao rádio via <a href="https://help.mikrotik.com/docs/display/ROS/Winbox">winbox</a></li>
+        <p>O winbox é um binário nativo do Windows para administração de roteadores Mikrotik. <br>
+        Alternativamente, usuá</p>
+        <li>Crie um novo terminal no winbox</li>
+        <li>Execute o seguinte comando para adicionar um novo usuário com senha e um endereço ip à RouterBoard:</li>
+        <div class="code">
+            <code>
+                /user add name=nome-de-usuario password=senha-do-usuario group=full <br>
+                /ip address add address=192.168.88.1 interface=ether1 netmask=24 comment=RB_Config
+            </code>
+        </div>
+        Guarde o nome de usuário e a senha, pois serão necessários para a ferramenta se conectar ao rádio durante a execução.
+    </ol>
+
+    <h2>Execução</h2>
+    <p>Para executar a ferramenta siga os seguintes passos:</p>
+    <ol>
+        <li>Certifique-se de configurar a placa de rede do seu computador para funcionar na mesma faixa do endereço ip que configurou anteriormente em seu roteador</li>
+        <li>Abra um terminal na pasta da ferramenta</li>
+        <li>Ative o ambiente virtual</li>
+        <li>Execute o seguinte comando:</li>
+        <div class="code">
+            <code>
+                $ python main.py
+            </code>
+        </div>
+        <p>Será solicitado as seguintes informações para que a ferramenta possa se conectar ao rádio:</p>
+        <ul>
+            <li>Endereço ip do roteador</li>
+            <li>Porta SSH</li>
+            <li>Nome de usuário</li>
+            <li>Senha</li>
+        </ul>
+        <p>A menos que tenha alterado, por padrão, a porta SSH é a 22. <br> O usuário e a senha são os que você criou anteriormente.</p>
+    </ol>
+    <h2>Funcionalidades</h2>
+    <ol>
+        <li>
+            <strong>Enviar comando</strong> <br>
+            Envia um comando que será executado no terminal do roteador.
+        </li> <br>
+        <li>
+            <strong>Setar DNS da RB</strong> <br>
+            Esta opção configura os endereços DNS que serão usados pela RouterBoard. <br>
+            Primeiro é solicitado a quantidade de endereços DNS que serão usados. <br>
+            Depois, para cada endereço, é solicitado o endereço ip e o nome do servidor DNS. <br>
+            Por fim, os servidores são configurados com o seguinte comando: <br>
+            <div class="code">
+                <code>
+                    /ip dns set servers=ip1,ip2,ip3...
+                </code>
+        </li>
+        <li>
+            <strong>Setar servidores NTP da RB</strong> <br>
+            Esta opção configura os servidores NTP que serão usados pela RouterBoard. <br>
+            Primeiro é solicitado o modo de operação do cliente NTP (broadcast, manycast, multicast, unicast). <br>
+            Depois, é solicitado o endereço ip do servidor primário e do servidor secundário. <br>
+            Por fim, os servidores são configurados com o seguinte comando: <br>
+            <div class="code">
+                <code>
+                    /system ntp client set enabled=yes mode={mode} primary-ntp={primary_server} secondary-ntp={secondary_server}
+                </code>
+        </li>
+        <li>
+            <strong>Adicionar IP</strong><br>
+            Esta opção adiciona um novo endereço ip à interface à interface desejada. <br>
+            Primeiro é solicitado um endereço ip, este endereço será verificado se realmente é um endereço válido. <br>
+            Se o endereço ip for inválido, o programa será encerrado. <br>
+            Depois, é solicitado o nome da interface que receberá o novo endereço ip. <br>
+            Neste passo é importante que o nome da interface seja exatamente igual ao nome que aparece no winbox. Exemplo: <code class="code_inline">ether1</code> ou <code class="code_inline">wlan1</code>.<br>
+            Por fim, o endereço ip é adicionado à interface com o seguinte comando: <br>
+            <div class="code">
+                <code>
+                    /ip address add address={ip} interface={interface} netmask={netmask}
+                </code>
+        </li>
+        <li>
+            <strong>Configura Access Point (Básico)</strong><br>
+            Esta opção configura o rádio para funcionar como um Access Point recebendo uma conexão de internet via cabo de rede com conexão. <br>
+            Primeiro é solicitado o modo de cenexão com a internet (DHCP, IP estático ou PPPoE). <br>
+            Se o modo for DHCP, o rádio receberá um endereço ip automaticamente. <br>
+            Se o modo for IP estático, será solicitado o endereço ip, a máscara de rede e o gateway. <br>
+            Se o modo for PPPoE, será solicitado o nome de usuário e a senha. <br>
+            <br>
+            No próximo passo é solicitado o nome da rede wireless (SSID) e a senha. <br>
+            Em seguida é solicitado o modelo do roteador. <br>
+            Com base no modelo lhe será solicitado a banda de frequência (2.4GHz ou 5GHz).<br>
+            <br>
+            Por fim, o rádio é configurado com as seguintes características: <br><br>
+            <ul>
+                <li>Conexão à internet na porta Ethernet de acordo com o modo especificado (DHCP, IP estático ou PPPoE).</li>
+                <li>Rede wireless configurada com o SSID e senha especificados.</li>
+                <li>Faixa de IP da rede local (wireless): 192.168.0.1/24.</li>
+                <li>Servidor DHCP na rede wireless com pool: 192.168.0.2 - 192.168.0.254 com servidores DNS = 8.8.8.8 e 1.1.1.1.</li>
+                <li>Protocolo RoMON com id = 00:00:00:00:00:01.</li>
+                <li>Client NTP com os seguintes servidores = 200.160.7.186 e 201.49.148.135.</li>
+            </ul><br>
+        </li>
+        <li>
+            <strong>Configura CPE Cliente</strong><br>
+            Esta opção configura o rádio para funcionar como um CPE Cliente recebendo uma conexão de internet via wireless. <br>
+            Primeiro é solicitado o modo de cenexão com a internet (DHCP, IP estático ou PPPoE). <br>
+            Se o modo for DHCP, o rádio receberá um endereço ip automaticamente. <br>
+            Se o modo for IP estático, será solicitado o endereço ip, a máscara de rede e o gateway. <br>
+            Se o modo for PPPoE, será solicitado o nome de usuário e a senha. <br>
+            ...
+        </li>
+    </ol>
 </body>
 </html>
