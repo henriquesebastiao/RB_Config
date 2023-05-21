@@ -2,7 +2,7 @@ import os
 import re
 
 
-def clear():
+def clear() -> None:
     """Clear the terminal screen"""
     os.system("cls" if os.name == "nt" else "clear")
 
