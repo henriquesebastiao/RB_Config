@@ -3,7 +3,7 @@
 
 RB_Config é uma ferramenta com o intuito de facilitar a configuração de um roteador Mikrotik RouterOS.
 
-[Documentação detalhada 📃.](https://henriquesebasm.com/RB_Config/)
+[Documentação detalhada 📃.](http://henriquesebastiao.com/RB_Config/)
 ### Funcionalidades
 
 - [x] Adicionar IP Address
